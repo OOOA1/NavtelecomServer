@@ -1,0 +1,27 @@
+server:
+  host: "0.0.0.0"
+  port: 5521
+  max_connections: 1000
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "navtelecom_server"
+  user: "navtelecom"
+  password: "password"
+  pool_size: 10
+
+api:
+  host: "0.0.0.0"
+  port: 8080
+  api_key: "your-secret-api-key"
+
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/server.log"
+
+protocol:
+  timeout: 30
+  keepalive_interval: 60
+

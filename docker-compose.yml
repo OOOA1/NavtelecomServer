@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: navtelecom_server
+      POSTGRES_USER: navtelecom
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U navtelecom -d navtelecom_server"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  navtelecom-server:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=navtelecom_server
+      - DATABASE_USER=navtelecom
+      - DATABASE_PASSWORD=password
+    ports:
+      - "5521:5521"  # TCP сервер
+      - "8080:8080"  # REST API
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
