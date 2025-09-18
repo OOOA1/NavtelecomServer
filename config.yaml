@@ -2,6 +2,9 @@ server:
   host: "0.0.0.0"
   port: 5521
   max_connections: 1000
+  read_buffer_size: 8192      # Размер буфера чтения (8KB)
+  max_frame_size: 1048576     # Максимальный размер фрейма (1MB)
+  max_total_buffer: 2097152   # Максимальный общий буфер (2MB)
 
 database:
   host: "localhost"
@@ -20,8 +23,12 @@ logging:
   level: "INFO"
   format: "json"
   file: "logs/server.log"
+  max_file_size: 10485760     # Максимальный размер лог файла (10MB)
+  backup_count: 5             # Количество резервных лог файлов
 
 protocol:
-  timeout: 30
-  keepalive_interval: 60
+  read_timeout: 5          # Таймаут чтения (короткий)
+  idle_timeout: 900        # Таймаут простоя (15 минут)
+  keepalive_interval: 60   # Интервал keepalive
+  keepalive_response_timeout: 1  # Максимальное время ответа на keepalive
 

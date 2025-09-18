@@ -41,8 +41,12 @@ CREATE TABLE raw_frames (
     id SERIAL PRIMARY KEY,
     device_id INTEGER REFERENCES devices(id) ON DELETE CASCADE,
     unique_id VARCHAR(50) NOT NULL,
-    frame_type VARCHAR(10) NOT NULL, -- A, T, X, E
-    raw_data TEXT NOT NULL,
+    frame_type VARCHAR(10) NOT NULL, -- A, T, X, E, B, FLEX, BINARY, UNKNOWN
+    raw_data TEXT, -- ASCII данные (если есть)
+    raw_bytes BYTEA, -- Бинарные данные
+    raw_hex TEXT, -- Hex представление
+    raw_base64 TEXT, -- Base64 представление
+    is_binary BOOLEAN DEFAULT FALSE, -- Флаг бинарного кадра
     parsed_data JSONB,
     received_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -69,7 +69,7 @@ class UniversalNavtelecomServer:
         self.connections[connection_id] = reader
         self.stats['connections_total'] += 1
         
-        logger.info(f"Новое соединение: {connection_id}")
+        logger.info("connection_established", client=connection_id)
 
         # Пробуем отправить краткое приветствие сразу после подключения
         try:
@@ -103,32 +103,42 @@ class UniversalNavtelecomServer:
                         
                         if line.strip():
                             await self.process_message(line.strip(), writer, connection_id)
+                        else:
+                            logger.debug("Пропущена пустая строка")
                 
                 except asyncio.TimeoutError:
                     # Ничего не шлем, просто продолжаем ждать данные
                     continue
                 
                 except Exception as e:
-                    logger.error(f"Ошибка чтения данных: {e}")
+                    logger.exception(f"Ошибка чтения данных: {e}")
                     self.stats['errors'] += 1
                     break
         
         except Exception as e:
-            logger.error(f"Ошибка обработки клиента: {e}")
+            logger.exception(f"Ошибка обработки клиента: {e}")
             self.stats['errors'] += 1
         
         finally:
-            if connection_id in self.connections:
-                del self.connections[connection_id]
-            
-            writer.close()
-            await writer.wait_closed()
-            logger.info(f"Соединение закрыто: {connection_id}")
+            try:
+                if connection_id in self.connections:
+                    del self.connections[connection_id]
+                
+                writer.close()
+                await writer.wait_closed()
+                logger.info("connection_closed", client=connection_id)
+            except Exception as cleanup_error:
+                logger.error(f"Ошибка при закрытии соединения: {cleanup_error}")
     
     async def process_message(self, message: str, writer: asyncio.StreamWriter, connection_id: str):
         """Обработка сообщения от устройства."""
         try:
-            logger.info(f"Получено сообщение: {message}")
+            # Проверка на пустое сообщение
+            if not message or not message.strip():
+                logger.debug("Пропущено пустое сообщение")
+                return
+            
+            logger.info("message_received", message=message)
             
             # Некоторые устройства Navtelecom сначала посылают приветствие вида
             # "@NTC ... FG*>S:<IMEI>" и ожидают ответ "OK".
@@ -137,7 +147,7 @@ class UniversalNavtelecomServer:
                 try:
                     writer.write(b"OK\r\n")
                     await writer.drain()
-                    logger.info("Отправлен ответ на приветствие: OK")
+                    logger.info("greeting_response_sent", response="OK")
                 except Exception as e:
                     logger.warning(f"Не удалось отправить OK на приветствие: {e}")
 
@@ -149,14 +159,14 @@ class UniversalNavtelecomServer:
                 parsed_data = self.parse_navtelecom_frame(message)
                 if parsed_data:
                     self.stats['navtelecom_frames'] += 1
-                    logger.info("Обработан Navtelecom кадр")
+                    logger.info("navtelecom_frame_processed")
             
             # Если не получилось, пробуем FLEX протокол
             if not parsed_data:
                 parsed_data = self.parse_flex_frame(message)
                 if parsed_data:
                     self.stats['flex_frames'] += 1
-                    logger.info("Обработан FLEX кадр")
+                    logger.info("flex_frame_processed")
             
             if not parsed_data:
                 logger.warning(f"Не удалось распарсить кадр: {message}")
@@ -167,7 +177,7 @@ class UniversalNavtelecomServer:
             self.stats['frames_processed'] += 1
             
         except Exception as e:
-            logger.error(f"Ошибка обработки сообщения: {e}")
+            logger.exception(f"Ошибка обработки сообщения: {e}")
             self.stats['errors'] += 1
     
     def parse_navtelecom_frame(self, data: str) -> Optional[Dict[str, Any]]:
@@ -381,7 +391,7 @@ class UniversalNavtelecomServer:
                 ack_response = "OK"
                 writer.write(ack_response.encode('utf-8'))
                 await writer.drain()
-                logger.info(f"Отправлен FLEX ACK: {ack_response}")
+                logger.info("flex_ack_sent", response=ack_response)
                 
             else:
                 # Обработка Navtelecom кадров
@@ -402,10 +412,10 @@ class UniversalNavtelecomServer:
                 ack_response = f"~{frame['frame_type']}ACK,{unique_id}~"
                 writer.write(ack_response.encode('utf-8'))
                 await writer.drain()
-                logger.info(f"Отправлен Navtelecom ACK: {ack_response}")
+                logger.info("navtelecom_ack_sent", response=ack_response)
             
         except Exception as e:
-            logger.error(f"Ошибка обработки кадра: {e}")
+            logger.exception(f"Ошибка обработки кадра: {e}")
             self.stats['errors'] += 1
     
     async def send_keepalive(self, writer: asyncio.StreamWriter):
@@ -415,7 +425,7 @@ class UniversalNavtelecomServer:
             writer.write(keepalive.encode('utf-8'))
             await writer.drain()
         except Exception as e:
-            logger.error(f"Ошибка отправки keepalive: {e}")
+            logger.exception(f"Ошибка отправки keepalive: {e}")
     
     async def monitor_stats(self):
         """Мониторинг статистики."""
