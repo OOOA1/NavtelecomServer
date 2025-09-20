@@ -1,0 +1,68 @@
+# Scania-specific CAN protocol extensions
+# Brand-specific PGNs and signals
+
+brand: "Scania"
+version: "1.0"
+
+# Scania-specific PGNs
+pgns:
+  "65290":  # 0xFF0A - Scania Engine Data
+    name: "ScaniaEngineData"
+    transport: "single"
+    signals:
+      - spn: 2000
+        name: "ScaniaEngineLoad"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 0.4
+        offset: 0.0
+        unit: "%"
+      
+      - spn: 2001
+        name: "ScaniaAdblueLevel"
+        start_bit: 8
+        length: 8
+        byte_order: "intel"
+        scale: 0.4
+        offset: 0.0
+        unit: "%"
+  
+  "65291":  # 0xFF0B - Scania Fuel System
+    name: "ScaniaFuelSystem"
+    transport: "single"
+    signals:
+      - spn: 2002
+        name: "ScaniaFuelConsumption"
+        start_bit: 0
+        length: 16
+        byte_order: "intel"
+        scale: 0.05
+        offset: 0.0
+        unit: "L/h"
+      
+      - spn: 2003
+        name: "ScaniaFuelLevel"
+        start_bit: 16
+        length: 8
+        byte_order: "intel"
+        scale: 0.4
+        offset: 0.0
+        unit: "%"
+
+# Scania-specific CAN ID patterns
+patterns:
+  - can_id_range: [0xFF0A, 0xFF0F]
+    description: "Scania proprietary PGNs"
+    protocol: "j1939"
+  
+  - can_id_range: [0x18FF0A00, 0x18FF0AFF]
+    description: "Scania extended CAN IDs"
+    protocol: "j1939_extended"
+
+# Scania-specific SPNs
+spns:
+  2000: "Scania Engine Load"
+  2001: "Scania AdBlue Level"
+  2002: "Scania Fuel Consumption"
+  2003: "Scania Fuel Level"

@@ -1,0 +1,157 @@
+# OBD-II Protocol Dictionary
+# Mode and PID definitions
+
+modes:
+  "01":  # Mode 01 - Show current data
+    name: "Current Data"
+    pids:
+      "00":  # Supported PIDs 01-20
+        name: "SupportedPIDs_01_20"
+        description: "Supported PIDs 01-20"
+      
+      "01":  # Monitor status
+        name: "MonitorStatus"
+        description: "Monitor status since DTCs cleared"
+      
+      "04":  # Engine load
+        name: "EngineLoad"
+        formula: "A * 100 / 255"
+        unit: "%"
+        description: "Calculated engine load value"
+      
+      "05":  # Engine coolant temperature
+        name: "EngineCoolantTemp"
+        formula: "A - 40"
+        unit: "°C"
+        description: "Engine coolant temperature"
+      
+      "0C":  # Engine RPM
+        name: "EngineRPM"
+        formula: "(A * 256 + B) / 4"
+        unit: "rpm"
+        description: "Engine speed"
+      
+      "0D":  # Vehicle speed
+        name: "VehicleSpeed"
+        formula: "A"
+        unit: "km/h"
+        description: "Vehicle speed"
+      
+      "0F":  # Intake air temperature
+        name: "IntakeAirTemp"
+        formula: "A - 40"
+        unit: "°C"
+        description: "Intake air temperature"
+      
+      "10":  # MAF air flow rate
+        name: "MAFAirFlow"
+        formula: "(A * 256 + B) / 100"
+        unit: "g/s"
+        description: "Mass air flow sensor"
+      
+      "11":  # Throttle position
+        name: "ThrottlePosition"
+        formula: "A * 100 / 255"
+        unit: "%"
+        description: "Throttle position"
+      
+      "1F":  # Run time since engine start
+        name: "RunTimeSinceStart"
+        formula: "A * 256 + B"
+        unit: "s"
+        description: "Run time since engine start"
+      
+      "2F":  # Fuel tank level input
+        name: "FuelTankLevel"
+        formula: "A * 100 / 255"
+        unit: "%"
+        description: "Fuel tank level input"
+      
+      "33":  # Absolute barometric pressure
+        name: "BarometricPressure"
+        formula: "A"
+        unit: "kPa"
+        description: "Absolute barometric pressure"
+      
+      "42":  # Control module voltage
+        name: "ControlModuleVoltage"
+        formula: "(A * 256 + B) / 1000"
+        unit: "V"
+        description: "Control module voltage"
+      
+      "46":  # Ambient air temperature
+        name: "AmbientAirTemp"
+        formula: "A - 40"
+        unit: "°C"
+        description: "Ambient air temperature"
+      
+      "51":  # Fuel type
+        name: "FuelType"
+        formula: "A"
+        unit: "enum"
+        description: "Fuel type"
+        values:
+          0: "Not available"
+          1: "Gasoline"
+          2: "Methanol"
+          3: "Ethanol"
+          4: "Diesel"
+          5: "LPG"
+          6: "CNG"
+          7: "Propane"
+          8: "Electric"
+          9: "Bifuel running Gasoline"
+          10: "Bifuel running Methanol"
+          11: "Bifuel running Ethanol"
+          12: "Bifuel running LPG"
+          13: "Bifuel running CNG"
+          14: "Bifuel running Propane"
+          15: "Bifuel running Electricity"
+          16: "Bifuel running electric and combustion engine"
+          17: "Hybrid gasoline"
+          18: "Hybrid Ethanol"
+          19: "Hybrid Diesel"
+          20: "Hybrid Electric"
+          21: "Hybrid running electric and combustion engine"
+          22: "Hybrid Regenerative"
+          23: "Bifuel running Diesel"
+
+  "09":  # Mode 09 - Request vehicle information
+    name: "Vehicle Information"
+    pids:
+      "02":  # VIN
+        name: "VIN"
+        description: "Vehicle Identification Number"
+        data_type: "string"
+      
+      "04":  # Calibration ID
+        name: "CalibrationID"
+        description: "Calibration ID"
+        data_type: "string"
+      
+      "06":  # CVN
+        name: "CVN"
+        description: "Calibration Verification Numbers"
+        data_type: "string"
+
+# CAN ID mappings for OBD-II
+can_ids:
+  request:
+    "7E0": "OBD Request to Engine"
+    "7E1": "OBD Request to Transmission"
+    "7E2": "OBD Request to ABS"
+    "7E3": "OBD Request to Body"
+    "7E4": "OBD Request to Chassis"
+    "7E5": "OBD Request to Network"
+    "7E6": "OBD Request to Powertrain"
+    "7E7": "OBD Request to Emissions"
+  
+  response:
+    "7E8": "OBD Response from Engine"
+    "7E9": "OBD Response from Transmission"
+    "7EA": "OBD Response from ABS"
+    "7EB": "OBD Response from Body"
+    "7EC": "OBD Response from Chassis"
+    "7ED": "OBD Response from Network"
+    "7EE": "OBD Response from Powertrain"
+    "7EF": "OBD Response from Emissions"

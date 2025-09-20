@@ -1,0 +1,104 @@
+# J1939 Protocol Dictionary
+# PGN (Parameter Group Number) mappings
+
+pgns:
+  "65265":  # 0xFEF1 - Engine Oil Pressure
+    name: "EngineOilPressure"
+    transport: "single"
+    signals:
+      - spn: 175
+        name: "EngineOilPressure"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 4.0
+        offset: 0.0
+        unit: "kPa"
+  
+  "65266":  # 0xFEF2 - Engine Oil Temperature
+    name: "EngineOilTemperature"
+    transport: "single"
+    signals:
+      - spn: 176
+        name: "EngineOilTemperature"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 1.0
+        offset: -40.0
+        unit: "°C"
+  
+  "61444":  # 0xF004 - Engine Speed
+    name: "EngineSpeed"
+    transport: "single"
+    signals:
+      - spn: 190
+        name: "EngineSpeed"
+        start_bit: 0
+        length: 16
+        byte_order: "intel"
+        scale: 0.125
+        offset: 0.0
+        unit: "rpm"
+  
+  "61443":  # 0xF003 - Vehicle Speed
+    name: "VehicleSpeed"
+    transport: "single"
+    signals:
+      - spn: 84
+        name: "VehicleSpeed"
+        start_bit: 0
+        length: 16
+        byte_order: "intel"
+        scale: 0.00390625
+        offset: 0.0
+        unit: "km/h"
+  
+  "61452":  # 0xF00C - Fuel Level
+    name: "FuelLevel"
+    transport: "single"
+    signals:
+      - spn: 96
+        name: "FuelLevel"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 0.4
+        offset: 0.0
+        unit: "%"
+  
+  "65262":  # 0xFEEE - Engine Temperature
+    name: "EngineTemperature"
+    transport: "single"
+    signals:
+      - spn: 110
+        name: "EngineCoolantTemperature"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 1.0
+        offset: -40.0
+        unit: "°C"
+  
+  "65263":  # 0xFEEF - Engine Fuel Rate
+    name: "EngineFuelRate"
+    transport: "single"
+    signals:
+      - spn: 183
+        name: "EngineFuelRate"
+        start_bit: 0
+        length: 16
+        byte_order: "intel"
+        scale: 0.05
+        offset: 0.0
+        unit: "L/h"
+
+# SPN (Suspect Parameter Number) definitions
+spns:
+  84: "Vehicle Speed"
+  96: "Fuel Level"
+  110: "Engine Coolant Temperature"
+  175: "Engine Oil Pressure"
+  176: "Engine Oil Temperature"
+  183: "Engine Fuel Rate"
+  190: "Engine Speed"

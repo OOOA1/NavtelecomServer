@@ -1,0 +1,168 @@
+# Prometheus alerting rules for Svoi server
+groups:
+  - name: server-health
+    rules:
+      # Server down
+      - alert: ServerDown
+        expr: up{job="svoi-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: svoi-server
+        annotations:
+          summary: "Svoi server is down"
+          description: "Svoi server is not responding"
+          runbook: "runbooks/01-no-frames.md"
+
+      # High CPU usage
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%, exceeding 80%"
+          runbook: "runbooks/02-queue-spike.md"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}%, exceeding 80%"
+          runbook: "runbooks/02-queue-spike.md"
+
+  - name: database-health
+    rules:
+      # Database down
+      - alert: DatabaseDown
+        expr: up{job="postgresql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgresql
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is not responding"
+          runbook: "runbooks/04-db-slow.md"
+
+      # Database slow
+      - alert: DatabaseSlow
+        expr: pg_stat_database_tup_returned / pg_stat_database_tup_fetched < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          service: postgresql
+        annotations:
+          summary: "Database queries are slow"
+          description: "Database query efficiency is {{ $value }}"
+          runbook: "runbooks/04-db-slow.md"
+
+      # High database connections
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: postgresql
+        annotations:
+          summary: "High database connections"
+          description: "Database connections are {{ $value | humanizePercentage }} of max"
+          runbook: "runbooks/04-db-slow.md"
+
+  - name: application-metrics
+    rules:
+      # No frames received
+      - alert: NoFrames
+        expr: increase(frames_received_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "No frames received for 10 minutes"
+          description: "No CAN frames have been received for 10 minutes"
+          runbook: "runbooks/01-no-frames.md"
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(processing_errors_total[5m]) / rate(frames_processed_total[5m]) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "High processing error rate"
+          description: "Processing error rate is {{ $value | humanizePercentage }}, exceeding 5%"
+          runbook: "runbooks/03-decode-errors-spike.md"
+
+      # Queue length high
+      - alert: QueueLengthHigh
+        expr: queue_length > 10000
+        for: 5m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "Queue length is high"
+          description: "Queue length is {{ $value }}, exceeding threshold of 10000"
+          runbook: "runbooks/02-queue-spike.md"
+
+  - name: security-events
+    rules:
+      # High rate of failed authentications
+      - alert: HighFailedAuthRate
+        expr: rate(failed_auth_attempts_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "High rate of failed authentications"
+          description: "Failed authentication rate is {{ $value }} per second"
+          runbook: "runbooks/09-security-incident.md"
+
+      # Suspicious activity
+      - alert: SuspiciousActivity
+        expr: rate(suspicious_requests_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: svoi-server
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "Suspicious request rate is {{ $value }} per second"
+          runbook: "runbooks/09-security-incident.md"
+
+  - name: backup-health
+    rules:
+      # Backup failed
+      - alert: BackupFailed
+        expr: backup_status == 0
+        for: 0m
+        labels:
+          severity: warning
+          service: backup
+        annotations:
+          summary: "Backup failed"
+          description: "Database backup has failed"
+          runbook: "runbooks/08-backup-restore-pitr.md"
+
+      # No recent backup
+      - alert: NoRecentBackup
+        expr: time() - backup_last_success_timestamp > 86400 * 2
+        for: 1h
+        labels:
+          severity: warning
+          service: backup
+        annotations:
+          summary: "No recent backup"
+          description: "No successful backup in the last 2 days"
+          runbook: "runbooks/08-backup-restore-pitr.md"
+

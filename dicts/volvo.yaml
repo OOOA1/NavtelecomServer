@@ -1,0 +1,68 @@
+# Volvo-specific CAN protocol extensions
+# Brand-specific PGNs and signals
+
+brand: "Volvo"
+version: "1.0"
+
+# Volvo-specific PGNs
+pgns:
+  "65280":  # 0xFF00 - Volvo Engine Data
+    name: "VolvoEngineData"
+    transport: "single"
+    signals:
+      - spn: 1000
+        name: "VolvoEngineLoad"
+        start_bit: 0
+        length: 8
+        byte_order: "intel"
+        scale: 0.4
+        offset: 0.0
+        unit: "%"
+      
+      - spn: 1001
+        name: "VolvoTurboPressure"
+        start_bit: 8
+        length: 16
+        byte_order: "intel"
+        scale: 0.1
+        offset: 0.0
+        unit: "kPa"
+  
+  "65281":  # 0xFF01 - Volvo Transmission Data
+    name: "VolvoTransmissionData"
+    transport: "single"
+    signals:
+      - spn: 1002
+        name: "VolvoGearPosition"
+        start_bit: 0
+        length: 4
+        byte_order: "intel"
+        scale: 1.0
+        offset: 0.0
+        unit: "gear"
+      
+      - spn: 1003
+        name: "VolvoTransmissionTemp"
+        start_bit: 4
+        length: 8
+        byte_order: "intel"
+        scale: 1.0
+        offset: -40.0
+        unit: "°C"
+
+# Volvo-specific CAN ID patterns
+patterns:
+  - can_id_range: [0xFF00, 0xFFFF]
+    description: "Volvo proprietary PGNs"
+    protocol: "j1939"
+  
+  - can_id_range: [0x18FF0000, 0x18FFFFFF]
+    description: "Volvo extended CAN IDs"
+    protocol: "j1939_extended"
+
+# Volvo-specific SPNs
+spns:
+  1000: "Volvo Engine Load"
+  1001: "Volvo Turbo Pressure"
+  1002: "Volvo Gear Position"
+  1003: "Volvo Transmission Temperature"
